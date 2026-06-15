@@ -1,17 +1,6 @@
-// ─────────────────────────────────────────────────────────────
-// src/supabase.js
-// Supabase 클라이언트 싱글톤
-// .env 파일에 아래 두 값을 설정하세요:
-//   VITE_SUPABASE_URL=https://xxxx.supabase.co
-//   VITE_SUPABASE_ANON_KEY=eyJhbGci...
-// ─────────────────────────────────────────────────────────────
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!SUPABASE_URL || !SUPABASE_ANON) {
-  console.warn('⚠️  Supabase 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.')
-}
+const SUPABASE_URL  = "https://alkpxrclmkhiordeljao.supabase.co"
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsa3B4cmNsbWtoaW9yZGVsamFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDA0MTEsImV4cCI6MjA5NjkxNjQxMX0.EDLyeEIHvHXOVL0uuDgmsNIC6TQSQMzAA2SUuErVPvE"
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
