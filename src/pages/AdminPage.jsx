@@ -164,9 +164,9 @@ function Dashboard() {
 
                   {/* 회사이름 + 메타 정보 */}
                   <div style={{ flex:1, minWidth:160 }}>
-                    <div style={{ fontSize:14, fontWeight:700 }}>{c.companyName}</div>
+                    <div style={{ fontSize:14, fontWeight:700 }}>{c.data?.companyName ?? '(이름 없음)'}</div>
                     <div style={{ fontSize:10, color:'#6a6880', marginTop:3 }}>
-                      {tmpl.name} · 조회 {c.viewCount.toLocaleString()} · 수정 {formatDate(c.updatedAt)}
+                      {tmpl.name} · 조회 {(c.view_count ?? c.views ?? 0).toLocaleString()} · 수정 {formatDate(c.updated_at)}
                     </div>
                   </div>
 
