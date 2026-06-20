@@ -57,3 +57,20 @@ export async function loadCard(slug) {
 export async function incrementView(slug) {
   await supabase.rpc('increment_view', { card_slug: slug })
 }
+// ── 전체 카드 목록 (관리자용) ──────────
+export async function listCards() {
+  const { data, error } = await supabase
+    .from('cards')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { cards: data, error }
+}
+
+// ── 카드 삭제 (slug 기준) ──────────
+export async function deleteCard(slug) {
+  const { error } = await supabase
+    .from('cards')
+    .delete()
+    .eq('slug', slug)
+  return { error }
+}
