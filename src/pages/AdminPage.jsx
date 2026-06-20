@@ -98,7 +98,7 @@ function Dashboard() {
   const filtered = cards.filter((c) => {
   const name = c.companyName ?? c.data?.companyName ?? ''
   return name.toLowerCase().includes(search.toLowerCase())
-)
+})
 
   return (
     <div style={{ minHeight:'100vh', background:'#08080f', color:'#f0ede6', fontFamily:'sans-serif' }}>
