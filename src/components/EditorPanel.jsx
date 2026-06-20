@@ -268,6 +268,118 @@ function ServicesEditor({t,data,setData,inp,lbl}){
   </>)
 }
 
+// ── 연혁(History) 편집 패널 ───────────────────────────────────
+function HistoryPanel({t,data,setData}){
+  const add=()=>setData({...data,history:[{id:'h'+uid(),year:String(new Date().getFullYear()),desc:'새로운 연혁을 입력하세요'},...data.history]})
+  const remove=(id)=>setData({...data,history:data.history.filter(h=>h.id!==id)})
+  const update=(id,fields)=>setData({...data,history:data.history.map(h=>h.id===id?{...h,...fields}:h)})
+  const inp={width:'100%',padding:'9px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
+  return(
+    <div style={{padding:'4px 0'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+        <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',fontFamily:'sans-serif',margin:0}}>🕰 History</p>
+        <button onClick={add} style={{fontSize:9,letterSpacing:'2px',padding:'4px 10px',background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+      </div>
+      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>연도(4자리)와 한 줄 설명을 입력하세요.<br/>최신순으로 정렬해서 보여줍니다.</p>
+      {data.history.length===0&&(
+        <div style={{padding:'20px 14px',border:`1px dashed ${t.border}`,textAlign:'center',fontSize:11,color:t.textSub,fontFamily:'sans-serif'}}>
+          항목이 없습니다. + 추가를 눌러 연혁을 입력하세요.
+        </div>
+      )}
+      {data.history.map((h)=>(
+        <div key={h.id} style={{padding:'12px',border:`1px solid ${t.border}`,marginBottom:10,background:t.surfaceAlt,position:'relative'}}>
+          <button onClick={()=>remove(h.id)} style={{position:'absolute',top:8,right:8,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+          <input style={{...inp,width:90,display:'inline-block',marginRight:8}} placeholder='연도' maxLength={4} value={h.year} onChange={e=>update(h.id,{year:e.target.value})}/>
+          <input style={{...inp,marginBottom:0}} placeholder='설명' value={h.desc} onChange={e=>update(h.id,{desc:e.target.value})}/>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── 서비스 단가표(Pricing) 편집 패널 ──────────────────────────
+function PricingPanel({t,data,setData}){
+  const add=()=>setData({...data,pricing:[...data.pricing,{id:'pr'+uid(),name:'New Plan',price:'0',period:'/월',features:['기능 1'],highlighted:false}]})
+  const remove=(id)=>setData({...data,pricing:data.pricing.filter(p=>p.id!==id)})
+  const update=(id,fields)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,...fields}:p)})
+  const setHighlight=(id)=>setData({...data,pricing:data.pricing.map(p=>({...p,highlighted:p.id===id?!p.highlighted:false}))})
+  const addFeature=(id)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:[...p.features,'새 기능']}:p)})
+  const updateFeature=(id,fi,val)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:p.features.map((f,i)=>i===fi?val:f)}:p)})
+  const removeFeature=(id,fi)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:p.features.filter((_,i)=>i!==fi)}:p)})
+  const inp={width:'100%',padding:'9px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
+  const inpSm={...inp,marginBottom:0,fontSize:11,padding:'7px 10px'}
+  return(
+    <div style={{padding:'4px 0'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+        <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',fontFamily:'sans-serif',margin:0}}>💳 Pricing</p>
+        <button onClick={add} disabled={data.pricing.length>=4}
+          style={{fontSize:9,letterSpacing:'2px',padding:'4px 10px',background:data.pricing.length>=4?t.border:t.accent,border:'none',color:data.pricing.length>=4?t.textSub:(t.id==='white'?'#fff':'#0a0a0f'),cursor:data.pricing.length>=4?'not-allowed':'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+      </div>
+      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>플랜은 최대 4개까지 추가할 수 있어요.<br/>'추천' 토글을 켜면 카드가 강조됩니다.</p>
+      {data.pricing.map((p)=>(
+        <div key={p.id} style={{padding:'14px',border:`1px solid ${p.highlighted?t.accent:t.border}`,marginBottom:12,background:t.surfaceAlt,position:'relative'}}>
+          <button onClick={()=>remove(p.id)} style={{position:'absolute',top:10,right:10,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+
+          <input style={inp} placeholder='플랜 이름' value={p.name} onChange={e=>update(p.id,{name:e.target.value})}/>
+          <div style={{display:'flex',gap:8,marginBottom:8}}>
+            <input style={{...inpSm,flex:1}} placeholder='가격 (예: 150, 문의)' value={p.price} onChange={e=>update(p.id,{price:e.target.value})}/>
+            <input style={{...inpSm,flex:1}} placeholder='단위 (예: /월)' value={p.period} onChange={e=>update(p.id,{period:e.target.value})}/>
+          </div>
+
+          {/* 기능 목록 */}
+          <div style={{marginBottom:8}}>
+            <span style={{fontSize:9,letterSpacing:'1px',color:t.textSub,textTransform:'uppercase',fontFamily:'sans-serif'}}>기능 목록</span>
+            {p.features.map((f,fi)=>(
+              <div key={fi} style={{display:'flex',gap:6,marginTop:6}}>
+                <input style={{...inpSm,flex:1}} value={f} onChange={e=>updateFeature(p.id,fi,e.target.value)}/>
+                <button onClick={()=>removeFeature(p.id,fi)} style={{width:28,flexShrink:0,background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontSize:12}}>×</button>
+              </div>
+            ))}
+            <button onClick={()=>addFeature(p.id)} style={{marginTop:6,fontSize:9,letterSpacing:'1px',padding:'5px 10px',background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase'}}>+ 기능 추가</button>
+          </div>
+
+          {/* 추천 토글 */}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${t.border}`}}>
+            <span style={{fontSize:10,color:t.text,fontFamily:'sans-serif'}}>이 플랜을 추천으로 강조</span>
+            <div onClick={()=>setHighlight(p.id)}
+              style={{width:38,height:22,borderRadius:11,cursor:'pointer',flexShrink:0,background:p.highlighted?t.accent:t.border,position:'relative',transition:'background .2s'}}>
+              <div style={{position:'absolute',top:2,width:18,height:18,borderRadius:'50%',background:'#fff',left:p.highlighted?18:2,transition:'left .2s'}}/>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── 섹션 표시 토글 패널 ────────────────────────────────────────
+function SectionsPanel({t,data,setData}){
+  const sections=data.sections||{history:false,pricing:false}
+  const toggle=(key)=>setData({...data,sections:{...sections,[key]:!sections[key]}})
+  const SI=[
+    {key:'history',label:'연혁 (History)',desc:'회사 연혁을 타임라인으로 표시'},
+    {key:'pricing',label:'서비스 단가표 (Pricing)',desc:'플랜별 가격 비교표 표시'},
+  ]
+  return(
+    <div style={{padding:'4px 0'}}>
+      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:8,fontFamily:'sans-serif'}}>📑 표시할 섹션</p>
+      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:16,lineHeight:1.6}}>켜둔 섹션만 카드 공개 화면에 노출됩니다.<br/>내용은 꺼져 있어도 저장되어 있어요.</p>
+      {SI.map(item=>(
+        <div key={item.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 0',borderBottom:`1px solid ${t.border}`}}>
+          <div>
+            <div style={{fontSize:12,color:t.text,fontFamily:'sans-serif',marginBottom:3}}>{item.label}</div>
+            <div style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif'}}>{item.desc}</div>
+          </div>
+          <div onClick={()=>toggle(item.key)}
+            style={{width:42,height:24,borderRadius:12,cursor:'pointer',flexShrink:0,background:sections[item.key]?t.accent:t.border,position:'relative',transition:'background .2s'}}>
+            <div style={{position:'absolute',top:3,width:18,height:18,borderRadius:'50%',background:'#fff',left:sections[item.key]?21:3,transition:'left .2s'}}/>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── 모션 설정 패널 ───────────────────────────────────────────
 function MotionPanel({t,me,setMe}){
   const MI=[
@@ -307,6 +419,9 @@ export default function EditorPanel({t,data,setData,co,setCo,me,setMe}){
 
   const TABS=[
     {k:'content',  l:'✏ 내용'},
+    {k:'sections', l:'📑 섹션'},
+    {k:'history',  l:'🕰 연혁'},
+    {k:'pricing',  l:'💳 단가표'},
     {k:'portfolio',l:'🖼 포트폴리오'},
     {k:'links',    l:'🔗 링크'},
     {k:'color',    l:'🎨 색상'},
@@ -359,6 +474,9 @@ export default function EditorPanel({t,data,setData,co,setCo,me,setMe}){
           <ServicesEditor t={t} data={data} setData={setData} inp={inp} lbl={lbl}/>
         </>)}
 
+        {et==='sections'&&<SectionsPanel t={t} data={data} setData={setData}/>}
+        {et==='history'&&<HistoryPanel t={t} data={data} setData={setData}/>}
+        {et==='pricing'&&<PricingPanel t={t} data={data} setData={setData}/>}
         {et==='portfolio'&&<PortfolioPanel t={t} data={data} setData={setData}/>}
         {et==='links'&&<LinksPanel t={t} data={data} setData={setData}/>}
         {et==='color'&&<ColorPanel t={t} co={co} setCo={setCo}/>}
