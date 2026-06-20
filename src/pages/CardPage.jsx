@@ -34,10 +34,14 @@ export default function CardPage() {
   const baseT = BASE_TEMPLATES[card.template_id] || BASE_TEMPLATES.dark
   const t = { ...baseT, accentRgb: hexToRgb(baseT.accent) }
   const shareUrl = `${window.location.origin}/card/${slug}`
-  const me = { particle:true, glitch:true, scroll:true, counter:true, hover:true, load:true }
+  // 모션 설정 — 카드 데이터에 저장된 값 사용. 구버전 저장 카드(motion 없음)는 전부 켜진 기본값으로
+  const me = {
+    particle:true, glitch:true, transition:true, scroll:true, counter:true, hover:true, load:true,
+    ...(card.data.motion || {}),
+  }
   // 구버전 저장 카드 호환: history/pricing/sections 없으면 빈 값으로 보완
   const cardData = {
-    history: [], pricing: [], sections: { history:false, pricing:false },
+    history: [], pricing: [], sections: { history:false, pricing:false, heroLinks:true },
     ...card.data,
   }
 
@@ -49,7 +53,7 @@ export default function CardPage() {
       {/* 카드 본문 */}
       <CardPreview t={t} data={cardData} shareUrl={shareUrl} me={me} readOnly />
 
-      {/* ━━ 하단 푸터 — 방문자 수 ━━ */}
+      {/* ━━ 하단 푸터 — 방문자 수만 표시 (받는 사람은 카드주인용 액션을 볼 필요 없음) ━━ */}
       <footer style={{
         padding:'20px 44px',
         background: t.surface,
@@ -57,39 +61,14 @@ export default function CardPage() {
         display:'flex', alignItems:'center', justifyContent:'space-between',
         flexWrap:'wrap', gap:12,
       }}>
-        {/* 방문자 수 */}
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{
-            width:32, height:32, borderRadius:'50%',
-            background:`rgba(${t.accentRgb},.1)`,
-            border:`1px solid rgba(${t.accentRgb},.3)`,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            fontSize:14,
-          }}>👁</div>
-          <div>
-            <div style={{ fontSize:18, fontWeight:800, color:t.accent, fontFamily:'sans-serif', lineHeight:1 }}>
-              {viewCount.toLocaleString()}
-            </div>
-            <div style={{ fontSize:9, letterSpacing:'2px', color:t.textSub, textTransform:'uppercase', fontFamily:'sans-serif', marginTop:2 }}>
-              Views
-            </div>
+        {/* 방문자 수 — 숫자만, 아이콘 없이 */}
+        <div>
+          <div style={{ fontSize:18, fontWeight:800, color:t.accent, fontFamily:'sans-serif', lineHeight:1 }}>
+            {viewCount.toLocaleString()}
           </div>
-        </div>
-
-        {/* 공유 버튼 */}
-        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <button onClick={() => { navigator.clipboard.writeText(shareUrl) }}
-            style={{ padding:'8px 18px', background:'transparent', border:`1px solid ${t.accent}`,
-              color:t.accent, fontSize:10, letterSpacing:'2px', textTransform:'uppercase',
-              cursor:'pointer', fontFamily:'sans-serif' }}>
-            🔗 링크 복사
-          </button>
-          <a href="/" style={{ padding:'8px 18px', background:t.accent, border:'none',
-            color: (card.template_id==='white'||card.template_id==='green') ? '#fff' : '#0a0a0f',
-            fontSize:10, letterSpacing:'2px', textTransform:'uppercase',
-            cursor:'pointer', fontFamily:'sans-serif', textDecoration:'none', display:'inline-block' }}>
-            ✦ 카드 만들기
-          </a>
+          <div style={{ fontSize:9, letterSpacing:'2px', color:t.textSub, textTransform:'uppercase', fontFamily:'sans-serif', marginTop:2 }}>
+            Views
+          </div>
         </div>
 
         {/* 브랜딩 */}

@@ -142,12 +142,14 @@ function HeroSection({t,data,me}){
           textTransform:'uppercase',fontFamily:'sans-serif',opacity:ld?1:0,
           transition:'opacity .6s ease .4s',margin:'0 0 24px'}}>{data.tagline}</p>
         <div style={{width:ld?48:0,height:1,background:t.accent,margin:'0 auto',transition:'width .8s ease .55s'}}/>
-        <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap',marginTop:24,
-          opacity:ld?1:0,transition:'opacity .6s ease .65s'}}>
-          {[...data.links].sort((a,b)=>a.order-b.order).filter(l=>l.active).map((l,i)=>(
-            <SnsBtn key={l.id} link={l} t={{...t,surfaceAlt:`rgba(${t.accentRgb},.06)`,border:`rgba(${t.accentRgb},.2)`}} compact/>
-          ))}
-        </div>
+        {(!data.sections || data.sections.heroLinks !== false) && (
+          <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap',marginTop:24,
+            opacity:ld?1:0,transition:'opacity .6s ease .65s'}}>
+            {[...data.links].sort((a,b)=>a.order-b.order).filter(l=>l.active).map((l,i)=>(
+              <SnsBtn key={l.id} link={l} t={{...t,surfaceAlt:`rgba(${t.accentRgb},.06)`,border:`rgba(${t.accentRgb},.2)`}} compact/>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -344,6 +346,11 @@ function PricingSection({t,data}){
 function ContactSection({t,data,shareUrl}){
   const isDark=t.id!=='white'
   const al=[...data.links].sort((a,b)=>a.order-b.order).filter(l=>l.active)
+  const [copied,setCopied]=useState(false)
+  const copyLink=()=>{
+    if(!shareUrl) return
+    navigator.clipboard.writeText(shareUrl).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),1800) })
+  }
   return(
     <section style={{padding:`clamp(36px,7vw,54px) ${P}`,background:t.surface,borderBottom:`1px solid ${t.border}`}}>
       <Reveal><p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:20,fontFamily:'sans-serif'}}>Contact</p></Reveal>
@@ -370,8 +377,15 @@ function ContactSection({t,data,shareUrl}){
               <img src={QR(shareUrl,isDark?'#ffffff':t.bg,t.accent)} alt='QR' width={90} height={90}/>
             </div>
             <div style={{flex:1,minWidth:120}}>
-              <p style={{fontSize:9,letterSpacing:'3px',color:t.textSub,textTransform:'uppercase',marginBottom:8,fontFamily:'sans-serif'}}>Scan to visit</p>
-              <p style={{fontSize:'clamp(9px,2.5vw,11px)',color:t.accent,fontFamily:'sans-serif',wordBreak:'break-all'}}>{shareUrl}</p>
+              <p style={{fontSize:9,letterSpacing:'3px',color:t.textSub,textTransform:'uppercase',marginBottom:8,fontFamily:'sans-serif'}}>
+                {copied?'복사 완료!':'Scan to visit · 탭하여 링크 복사'}
+              </p>
+              <p onClick={copyLink}
+                style={{fontSize:'clamp(9px,2.5vw,11px)',color:copied?t.text:t.accent,fontFamily:'sans-serif',
+                  wordBreak:'break-all',cursor:'pointer',textDecoration:copied?'none':'underline',
+                  textDecorationColor:`rgba(${t.accentRgb},.4)`,transition:'color .2s ease'}}>
+                {shareUrl}
+              </p>
             </div>
           </div>
         </Reveal>

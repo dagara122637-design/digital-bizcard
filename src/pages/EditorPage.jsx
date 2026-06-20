@@ -65,7 +65,7 @@ export const DEFAULT_DATA = {
     { id:'pr3', name:'Premium',  price:'문의', period:'',   features:['전담 매니저 배정','무제한 미팅','24시간 지원','콘텐츠 무제한'], highlighted:false },
   ],
   // ── 섹션 표시 토글 ────────────────────────────────────────────
-  sections: { history:false, pricing:false },
+  sections: { history:false, pricing:false, heroLinks:true },
   heroBgImage: null,
   logoImage: null,
 }
@@ -129,13 +129,14 @@ export default function EditorPage() {
 
   async function handleSave() {
     setSaving(true); setSaveMsg(null)
+    const payload = { ...data, motion: me } // 모션 설정도 카드 데이터에 함께 저장
     try {
       if (slug) {
-        const { error } = await updateCard(slug, data, tmplKey)
+        const { error } = await updateCard(slug, payload, tmplKey)
         if (error) throw error
         setSaveMsg({ type:'ok', text:'업데이트 완료!' })
       } else {
-        const { slug: newSlug, error } = await saveCard(data, tmplKey)
+        const { slug: newSlug, error } = await saveCard(payload, tmplKey)
         if (error) throw error
         setSlug(newSlug)
         setSaveMsg({ type:'ok', text:'저장 완료! 링크가 발급됐어요.' })
@@ -236,8 +237,8 @@ export default function EditorPage() {
       {/* ━━ 바디 ━━ */}
       <div style={{ display:'flex', flex:1, overflow:'hidden', minHeight:0 }}>
 
-        {/* 편집 패널 — 데스크탑에서 480px로 확장, 항상 표시 */}
-        <div style={{ width: isDesktop ? '620px' : '100%', flexShrink:0, overflowY:'auto',
+        {/* 편집 패널 — 데스크탑에서 560px로 확장, 항상 표시 */}
+        <div style={{ width: isDesktop ? '560px' : '100%', flexShrink:0, overflowY:'auto',
           display: (isDesktop || tab==='editor') ? 'flex' : 'none', flexDirection:'column',
           borderRight:`1px solid ${t.border}` }}>
           <EditorPanel t={t} data={data} setData={setData} co={co} setCo={setCo} me={me} setMe={setMe} />

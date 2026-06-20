@@ -354,9 +354,10 @@ function PricingPanel({t,data,setData}){
 
 // ── 섹션 표시 토글 패널 ────────────────────────────────────────
 function SectionsPanel({t,data,setData}){
-  const sections=data.sections||{history:false,pricing:false}
+  const sections={history:false,pricing:false,heroLinks:true,...(data.sections||{})}
   const toggle=(key)=>setData({...data,sections:{...sections,[key]:!sections[key]}})
   const SI=[
+    {key:'heroLinks',label:'히어로 SNS 버튼',desc:'회사명 아래 SNS 아이콘 4개 표시 (하단 Contact 섹션엔 영향 없음)'},
     {key:'history',label:'연혁 (History)',desc:'회사 연혁을 타임라인으로 표시'},
     {key:'pricing',label:'서비스 단가표 (Pricing)',desc:'플랜별 가격 비교표 표시'},
   ]
