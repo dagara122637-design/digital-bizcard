@@ -157,8 +157,8 @@ function LinksPanel({t,data,setData}){
     setData({...data,links:reordered})
   })
   const inp={flex:1,padding:'7px 10px',background:t.bg,border:`1px solid ${t.border}`,color:t.text,fontSize:11,fontFamily:'sans-serif',outline:'none',minWidth:0}
-  const toggle=(id)=>setData({...data,links:data.links.map(l=>l.id===id?{...l,active:!l.active}:l)})
-  const updateUrl=(id,url)=>setData({...data,links:data.links.map(l=>l.id===id?{...l,url}:l)})
+  const toggle=(platform)=>setData({...data,links:data.links.map(l=>l.platform===platform?{...l,active:!l.active}:l)})
+const updateUrl=(platform,url)=>setData({...data,links:data.links.map(l=>l.platform===platform?{...l,url}:l)})
 
   return(
     <div style={{padding:'20px 0'}}>
@@ -170,7 +170,7 @@ function LinksPanel({t,data,setData}){
           const isOver=overIdx===i&&dragIdx!==i
           const iProps=getItemProps(i)
           return(
-            <div key={link.id} {...iProps} style={{...iProps.style,padding:'11px 13px',
+            <div key={link.platform} {...iProps} style={{...iProps.style,padding:'11px 13px',
               background:link.active?`rgba(${hexToRgb(m.color)},.06)`:t.surfaceAlt,
               border:`1px solid ${isOver?t.accent:link.active?m.color:t.border}`,
               borderLeft:isOver?`3px solid ${t.accent}`:`1px solid ${link.active?m.color:t.border}`}}>
@@ -180,12 +180,12 @@ function LinksPanel({t,data,setData}){
                   <div style={{width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center'}}>{m.icon}</div>
                 </div>
                 <span style={{flex:1,fontSize:11,fontWeight:700,color:link.active?t.text:t.textSub,fontFamily:'sans-serif',letterSpacing:'.5px'}}>{m.label}</span>
-                <div onClick={e=>{e.stopPropagation();toggle(link.id)}}
+                <div onClick={e=>{e.stopPropagation();toggle(link.platform)}}
                   style={{width:36,height:20,borderRadius:10,cursor:'pointer',flexShrink:0,background:link.active?m.color:t.border,position:'relative',transition:'background .2s'}}>
                   <div style={{position:'absolute',top:2,width:16,height:16,borderRadius:'50%',background:'#fff',left:link.active?18:2,transition:'left .2s'}}/>
                 </div>
               </div>
-              {link.active&&<input style={inp} placeholder='https://...' value={link.url} onChange={e=>updateUrl(link.id,e.target.value)}/>}
+              {link.active&&<input style={inp} placeholder='https://...' value={link.url} onChange={e=>updateUrl(link.platform,e.target.value)}/>}
               {isOver&&<div style={{height:2,background:t.accent,marginTop:6,borderRadius:1}}/>}
             </div>
           )
