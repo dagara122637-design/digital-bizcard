@@ -1,6 +1,6 @@
 // src/pages/EditorPage.jsx
 import { useState, useRef, useEffect } from 'react'
-import { saveCard, updateCard } from '../db'
+import { saveCard, updateCard, loadCard } from '../db'  
 import CardPreview from '../components/CardPreview'
 import EditorPanel from '../components/EditorPanel'
 
@@ -120,6 +120,21 @@ export default function EditorPage() {
   const [saveMsg, setSaveMsg] = useState(null)
   const [copied, setCopied]   = useState(false)
   const [mobileTab, setMobileTab] = useState('editor') // 모바일 전용
+  // 편집 모드: URL의 ?edit=slug 가 있으면 기존 카드를 불러와 채움
+  useEffect(() => {
+    const editSlug = new URLSearchParams(window.location.search).get('edit')
+    if (!editSlug) return
+    async function loadForEdit() {
+      const { card, error } = await loadCard(editSlug)
+      if (error || !card) return
+      const { motion, ...content } = card.data || {}
+      setData({ ...DEFAULT_DATA, ...content })
+      setMe(prev => ({ ...prev, ...(motion || {}) }))
+      setTmplKey(card.template_id || 'dark')
+      setSlug(card.slug)
+    }
+    loadForEdit()
+  }, [])
 
   const [activeTmpl, slideStyle] = useSlideTransition(tmplKey, me.transition)
   const isDesktop = useIsDesktop(1024)
