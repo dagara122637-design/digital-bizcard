@@ -32,7 +32,7 @@ export default async function middleware(req) {
 
   const title = esc(data.companyName || '디지털 명함');
   const desc  = esc(data.description || data.tagline || '명함을 확인해보세요');
-  const image = url.origin + '/og-default.png';   // ⬅️ 방금 넣은 공통 이미지
+  const image = url.origin + '/og-v2.png';   // ⬅️ 방금 넣은 공통 이미지
 
   const html = `<!DOCTYPE html><html lang="ko"><head>
 <meta charset="utf-8"/>
