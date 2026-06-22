@@ -7,10 +7,10 @@ const BOT_UA = /kakaotalk-scrap|facebookexternalhit|twitterbot|slackbot|telegram
 
 export default async function middleware(req) {
   const ua = req.headers.get('user-agent') || '';
-  // 사람이면 기존 앱 그대로 통과
   if (!BOT_UA.test(ua)) return next();
 
-  const slug = new URL(req.url).pathname.split('/').pop();
+  const url = new URL(req.url);
+  const slug = url.pathname.split('/').pop();
 
   let data = {};
   try {
@@ -32,13 +32,16 @@ export default async function middleware(req) {
 
   const title = esc(data.companyName || '디지털 명함');
   const desc  = esc(data.description || data.tagline || '명함을 확인해보세요');
+  const image = url.origin + '/og-default.png';   // ⬅️ 방금 넣은 공통 이미지
 
   const html = `<!DOCTYPE html><html lang="ko"><head>
 <meta charset="utf-8"/>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="${title}"/>
 <meta property="og:description" content="${desc}"/>
+<meta property="og:image" content="${image}"/>
 <meta property="og:url" content="${esc(req.url)}"/>
+<meta name="twitter:card" content="summary_large_image"/>
 <title>${title}</title>
 </head><body></body></html>`;
 
