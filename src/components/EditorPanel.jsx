@@ -250,7 +250,7 @@ function PortfolioPanel({t,data,setData}){
 
 // ── 서비스 편집 ──────────────────────────────────────────────
 function ServicesEditor({t,data,setData,inp,lbl}){
-  const add=()=>setData({...data,services:[...data.services,{id:'s'+uid(),title:'New Service',desc:'서비스 설명'}]})
+  const add=()=>setData({...data,services:[...data.services,{id:'s'+uid(),title:'New Service',desc:'서비스 설명',items:[]}]})
   const remove=(id)=>setData({...data,services:data.services.filter(s=>s.id!==id)})
   const update=(id,fields)=>setData({...data,services:data.services.map(s=>s.id===id?{...s,...fields}:s)})
   return(<>
@@ -263,6 +263,26 @@ function ServicesEditor({t,data,setData,inp,lbl}){
         <button onClick={()=>remove(s.id)} style={{position:'absolute',top:8,right:8,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
         <input style={inp} placeholder='Title' value={s.title} onChange={e=>update(s.id,{title:e.target.value})}/>
         <input style={{...inp,marginBottom:0}} placeholder='Description' value={s.desc} onChange={e=>update(s.id,{desc:e.target.value})}/>
+
+        {/* ── 상세 리스트 (바텀시트에 뜨는 항목들) ── */}
+        <div style={{marginTop:12,paddingTop:12,borderTop:`1px dashed ${t.border}`}}>
+          <p style={{fontSize:9,letterSpacing:'1px',color:t.textSub,fontFamily:'sans-serif',marginBottom:8,textTransform:'uppercase'}}>상세 리스트</p>
+          {(s.items||[]).map((it,ii)=>(
+            <div key={ii} style={{display:'flex',gap:6,marginBottom:6,alignItems:'center'}}>
+              <input style={{...inp,marginBottom:0,flex:1}} placeholder={`항목 ${ii+1}`} value={it}
+                onChange={e=>{
+                  const next=[...(s.items||[])]; next[ii]=e.target.value;
+                  update(s.id,{items:next})
+                }}/>
+              <button onClick={()=>{
+                const next=(s.items||[]).filter((_,k)=>k!==ii);
+                update(s.id,{items:next})
+              }} style={{width:24,height:24,flexShrink:0,borderRadius:'4px',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer'}}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>update(s.id,{items:[...(s.items||[]),'']})}
+            style={{fontSize:9,letterSpacing:'1px',padding:'5px 12px',background:'transparent',border:`1px solid ${t.border}`,color:t.text,cursor:'pointer',fontFamily:'sans-serif',marginTop:2}}>+ 항목 추가</button>
+        </div>
       </div>
     ))}
   </>)

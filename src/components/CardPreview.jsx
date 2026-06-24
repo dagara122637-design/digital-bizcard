@@ -135,7 +135,7 @@ function HeroSection({t,data,me}){
         </div>
         <div style={{opacity:ld?1:0,transform:ld?'none':'translateY(16px)',transition:'opacity .6s ease .25s,transform .6s ease .25s',marginBottom:10}}>
           <GlitchText text={data.companyName} active={me&&me.glitch}
-            style={{fontSize:'clamp(18px,5vw,30px)',fontWeight:800,letterSpacing:'clamp(4px,2vw,10px)',
+            style={{fontSize:'clamp(20px,5vw,30px)',fontWeight:800,letterSpacing:'clamp(4px,2vw,10px)',
               color:t.text,margin:0,fontFamily:'sans-serif',display:'inline-block'}}/>
         </div>
         <p style={{fontSize:'clamp(10px,2.5vw,12px)',letterSpacing:'clamp(1px,0.8vw,3px)',color:t.accent,
@@ -191,33 +191,89 @@ function AboutSection({t,data}){
 
 function ServicesSection({t,data}){
   const[hov,sH]=useState(null)
+  const[open,sOpen]=useState(null)  // 바텀시트로 열린 서비스 index (null이면 닫힘)
+
   return(
     <section style={{padding:`clamp(36px,7vw,54px) ${P}`,background:t.surface,borderBottom:`1px solid ${t.border}`}}>
       <Reveal><p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:20,fontFamily:'sans-serif'}}>Services</p></Reveal>
       <div style={{display:'flex',flexDirection:'column',gap:10}}>
         {data.services.map((s,i)=>(
           <Reveal key={s.id||i} delay={i*.08}>
-            <div onMouseEnter={()=>sH(i)} onMouseLeave={()=>sH(null)}
+            <div onMouseEnter={()=>sH(i)} onMouseLeave={()=>sH(null)} onClick={()=>sOpen(i)}
               style={{padding:'clamp(16px,4vw,22px) clamp(16px,4vw,26px)',
                 background:hov===i?`rgba(${t.accentRgb},.06)`:t.surfaceAlt,
-                border:`1px solid ${hov===i?t.accent:t.border}`,borderLeft:`3px solid ${t.accent}`,
+                borderTop:`1px solid ${hov===i?t.accent:t.border}`,
+borderRight:`1px solid ${hov===i?t.accent:t.border}`,
+borderBottom:`1px solid ${hov===i?t.accent:t.border}`,
+borderLeft:`3px solid ${t.accent}`,
                 display:'flex',justifyContent:'space-between',alignItems:'center',
                 transition:'all .25s ease',transform:hov===i?'translateX(4px)':'none',
-                minHeight:64}}>
+                minHeight:64,cursor:'pointer'}}>
               <div>
                 <div style={{fontSize:'clamp(12px,3vw,13px)',fontWeight:700,letterSpacing:'1px',color:t.text,fontFamily:'sans-serif',marginBottom:4}}>{s.title}</div>
                 <div style={{fontSize:'clamp(11px,2.5vw,12px)',color:t.textSub,fontFamily:'sans-serif'}}>{s.desc}</div>
               </div>
-              <div style={{width:6,height:6,borderRadius:'50%',background:t.accent,flexShrink:0,
-                transform:hov===i?'scale(1.6)':'scale(1)',transition:'transform .25s ease',marginLeft:12}}/>
+              {/* 점 → "자세히 보기 >" 로 교체 (눌러볼 수 있다는 신호) */}
+              <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0,marginLeft:12,
+                color:hov===i?t.accent:t.textSub,transition:'color .25s ease',whiteSpace:'nowrap'}}>
+                <span style={{fontSize:'clamp(10px,2.4vw,11px)',fontWeight:600,fontFamily:'sans-serif'}}>자세히</span>
+                <span style={{fontSize:'clamp(11px,2.6vw,12px)',transform:hov===i?'translateX(2px)':'none',transition:'transform .25s ease'}}>›</span>
+              </div>
             </div>
           </Reveal>
         ))}
       </div>
+
+      {/* ───────── 바텀시트 ───────── */}
+      {open!==null && (
+        <div onClick={()=>sOpen(null)}
+          style={{position:'fixed',inset:0,zIndex:1000,
+            background:'rgba(0,0,0,.45)',
+            display:'flex',alignItems:'flex-end',justifyContent:'center',
+            animation:'sheetFade .2s ease'}}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{width:'100%',maxWidth:480,maxHeight:'82vh',overflowY:'auto',
+              background:t.surface,borderRadius:'20px 20px 0 0',
+              padding:'clamp(20px,5vw,28px)',
+              boxShadow:'0 -8px 32px rgba(0,0,0,.18)',
+              animation:'sheetUp .28s cubic-bezier(.16,1,.3,1)'}}>
+
+            {/* 상단 드래그 핸들 */}
+            <div style={{width:40,height:4,borderRadius:4,background:t.border,
+              margin:'0 auto 16px'}}/>
+
+            {/* 헤더: 제목 + 닫기 */}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:18}}>
+              <div>
+                <div style={{fontSize:'clamp(16px,4.2vw,19px)',fontWeight:700,color:t.text,fontFamily:'sans-serif',marginBottom:6}}>{data.services[open].title}</div>
+                <div style={{fontSize:'clamp(12px,3vw,13px)',color:t.textSub,fontFamily:'sans-serif',lineHeight:1.5}}>{data.services[open].desc}</div>
+              </div>
+              <div onClick={()=>sOpen(null)}
+                style={{fontSize:22,color:t.textSub,cursor:'pointer',lineHeight:1,padding:'2px 4px',flexShrink:0,marginLeft:12}}>×</div>
+            </div>
+
+{/* 본문: 불릿 리스트 */}
+<div style={{display:'flex',flexDirection:'column',gap:9}}>
+  {(data.services[open].items||[]).map((it,ii)=>(
+    <div key={ii} style={{display:'flex',gap:9,alignItems:'flex-start'}}>
+      <span style={{width:5,height:5,borderRadius:'50%',background:t.accent,flexShrink:0,marginTop:7}}/>
+      <span style={{fontSize:'clamp(12px,3vw,13px)',color:t.text,opacity:.85,fontFamily:'sans-serif',lineHeight:1.6}}>{it}</span>
+    </div>
+  ))}
+</div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 바텀시트 애니메이션 */}
+      <style>{`
+        @keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        @keyframes sheetFade{from{opacity:0}to{opacity:1}}
+      `}</style>
     </section>
   )
 }
-
 function PortfolioSection({t,data}){
   const[hov,sH]=useState(null)
   const[slide,setSlide]=useState(null)
