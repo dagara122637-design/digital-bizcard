@@ -404,8 +404,7 @@ function SectionsPanel({t,data,setData}){
 // ── 모션 설정 패널 ───────────────────────────────────────────
 function MotionPanel({t,me,setMe}){
   const MI=[
-    {key:'particle',label:'파티클 배경',desc:'히어로 유동 파티클'},
-    {key:'glitch',label:'글리치 텍스트',desc:'회사명 chromatic 글리치'},
+    {key:'particle',label:'파티클 배경',desc:'히어로 유동 파티클'}
     {key:'transition',label:'슬라이드 전환',desc:'템플릿 방향 슬라이드'},
     {key:'scroll',label:'스크롤 Reveal',desc:'섹션 진입 페이드업'},
     {key:'counter',label:'카운터 애니메이션',desc:'실적 숫자 카운트업'},
