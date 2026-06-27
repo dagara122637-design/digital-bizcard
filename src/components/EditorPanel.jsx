@@ -181,6 +181,7 @@ function LinksPanel({t,data,setData}){
                 </div>
                 <span style={{flex:1,fontSize:11,fontWeight:700,color:link.active?t.text:t.textSub,fontFamily:'sans-serif',letterSpacing:'.5px'}}>{m.label}</span>
                 <div onClick={e=>{e.stopPropagation();toggle(link.platform)}}
+                  onPointerDown={e=>e.stopPropagation()}
                   style={{width:36,height:20,borderRadius:10,cursor:'pointer',flexShrink:0,background:link.active?m.color:t.border,position:'relative',transition:'background .2s'}}>
                   <div style={{position:'absolute',top:2,width:16,height:16,borderRadius:'50%',background:'#fff',left:link.active?18:2,transition:'left .2s'}}/>
                 </div>
@@ -404,7 +405,8 @@ function SectionsPanel({t,data,setData}){
 // ── 모션 설정 패널 ───────────────────────────────────────────
 function MotionPanel({t,me,setMe}){
   const MI=[
-    {key:'particle',label:'파티클 배경',desc:'히어로 유동 파티클'}
+    {key:'particle',label:'파티클 배경',desc:'히어로 유동 파티클'},
+    {key:'glitch',label:'글리치 텍스트',desc:'회사명 chromatic 글리치'},
     {key:'transition',label:'슬라이드 전환',desc:'템플릿 방향 슬라이드'},
     {key:'scroll',label:'스크롤 Reveal',desc:'섹션 진입 페이드업'},
     {key:'counter',label:'카운터 애니메이션',desc:'실적 숫자 카운트업'},
