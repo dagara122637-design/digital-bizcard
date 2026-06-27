@@ -1,5 +1,5 @@
 // src/components/EditorPanel.jsx
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 function hexToRgb(h) {
   const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h)
@@ -17,8 +17,6 @@ function readFileB64(file) {
 }
 
 // ── 터치+마우스 통합 드래그 정렬 ─────────────────────────────
-import { useRef, useCallback } from 'react'
-
 function useTouchDragSort(items, onReorder) {
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
@@ -104,7 +102,7 @@ const SNS_META = {
 function ColorPanel({t,co,setCo}){
   const row=(label,key,val)=>(
     <div key={key} style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-      <span style={{fontSize:10,letterSpacing:'2px',color:t.textSub,textTransform:'uppercase',fontFamily:'sans-serif'}}>{label}</span>
+      <span style={{fontSize:12,color:t.text,fontFamily:'sans-serif'}}>{label}</span>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
         <span style={{fontSize:10,color:t.textSub,fontFamily:'monospace'}}>{val}</span>
         <input type='color' value={val} onChange={e=>setCo(p=>({...p,[key]:e.target.value}))}
@@ -113,13 +111,14 @@ function ColorPanel({t,co,setCo}){
     </div>
   )
   return(
-    <div style={{padding:'20px 0'}}>
-      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:18,fontFamily:'sans-serif'}}>🎨 Color Tokens</p>
-      {row('Accent','accent',co.accent||t.accent)}
-      {row('Background','bg',co.bg||t.bg)}
-      {row('Text','text',co.text||t.text)}
-      {row('Surface','surface',co.surface||t.surface)}
-      <button onClick={()=>setCo({})} style={{marginTop:8,padding:'7px 16px',border:`1px solid ${t.border}`,background:'transparent',color:t.textSub,fontSize:10,letterSpacing:'2px',cursor:'pointer',fontFamily:'sans-serif'}}>↺ Reset</button>
+    <div style={{padding:'4px 0'}}>
+      <p style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:6,fontFamily:'sans-serif'}}>🎨 색상</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:16,lineHeight:1.5}}>이 카드만의 색을 바꿀 수 있어요. 초기화를 누르면 템플릿 기본 색으로 돌아갑니다.</p>
+      {row('강조색 (Accent)','accent',co.accent||t.accent)}
+      {row('배경 (Background)','bg',co.bg||t.bg)}
+      {row('글자 (Text)','text',co.text||t.text)}
+      {row('표면 (Surface)','surface',co.surface||t.surface)}
+      <button onClick={()=>setCo({})} style={{marginTop:8,padding:'8px 16px',borderRadius:8,border:`1px solid ${t.border}`,background:'transparent',color:t.textSub,fontSize:12,cursor:'pointer',fontFamily:'sans-serif'}}>↺ 기본 색으로 초기화</button>
     </div>
   )
 }
@@ -130,22 +129,23 @@ function ImageUploadPanel({t,data,setData}){
     var file=e.target.files[0]; if(!file) return
     readFileB64(file).then(function(b64){ setData(function(p){ return{...p,[k]:b64} }) })
   }
-  const Box=({label,k,cur})=>(
+  const Box=({label,hint,k,cur})=>(
     <div style={{marginBottom:18}}>
-      <p style={{fontSize:9,letterSpacing:'3px',color:t.accent,textTransform:'uppercase',marginBottom:10,fontFamily:'sans-serif'}}>{label}</p>
-      <label style={{display:'flex',alignItems:'center',justifyContent:'center',height:cur?80:64,border:`1px dashed ${t.border}`,cursor:'pointer',overflow:'hidden',background:cur?'transparent':t.surfaceAlt}}>
+      <p style={{fontSize:13,fontWeight:600,color:t.text,marginBottom:3,fontFamily:'sans-serif'}}>{label}</p>
+      <p style={{fontSize:11,color:t.textSub,marginBottom:8,fontFamily:'sans-serif',lineHeight:1.5}}>{hint}</p>
+      <label style={{display:'flex',alignItems:'center',justifyContent:'center',height:cur?90:70,borderRadius:8,border:`1px dashed ${t.border}`,cursor:'pointer',overflow:'hidden',background:cur?'transparent':t.surfaceAlt}}>
         {cur?<img src={cur} alt={label} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-          :<span style={{fontSize:10,color:t.textSub,letterSpacing:'2px',fontFamily:'sans-serif'}}>+ 업로드</span>}
+          :<span style={{fontSize:12,color:t.textSub,fontFamily:'sans-serif'}}>+ 이미지 업로드</span>}
         <input type='file' accept='image/*' style={{display:'none'}} onChange={e=>handleBrandImg(e,k)}/>
       </label>
-      {cur&&<button onClick={()=>setData(p=>({...p,[k]:null}))} style={{marginTop:6,fontSize:10,color:t.textSub,background:'none',border:'none',cursor:'pointer',letterSpacing:'1px',fontFamily:'sans-serif'}}>× 제거</button>}
+      {cur&&<button onClick={()=>setData(p=>({...p,[k]:null}))} style={{marginTop:6,fontSize:11,color:t.textSub,background:'none',border:'none',cursor:'pointer',fontFamily:'sans-serif'}}>× 제거</button>}
     </div>
   )
   return(
-    <div style={{padding:'20px 0'}}>
-      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:18,fontFamily:'sans-serif'}}>📷 Brand Images</p>
-      <Box label='Logo Image' k='logoImage' cur={data.logoImage}/>
-      <Box label='Hero Background' k='heroBgImage' cur={data.heroBgImage}/>
+    <div style={{padding:'4px 0'}}>
+      <p style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:16,fontFamily:'sans-serif'}}>📷 브랜드 이미지</p>
+      <Box label='로고 이미지' hint='정사각형 PNG(투명배경) 권장 · 약 400×400px' k='logoImage' cur={data.logoImage}/>
+      <Box label='히어로 배경' hint='카드 상단 배경 이미지 · 가로로 긴 사진 권장' k='heroBgImage' cur={data.heroBgImage}/>
     </div>
   )
 }
@@ -156,21 +156,21 @@ function LinksPanel({t,data,setData}){
   const{getItemProps,overIdx,dragIdx}=useTouchDragSort(sorted,(reordered)=>{
     setData({...data,links:reordered})
   })
-  const inp={flex:1,padding:'7px 10px',background:t.bg,border:`1px solid ${t.border}`,color:t.text,fontSize:11,fontFamily:'sans-serif',outline:'none',minWidth:0}
+  const inp={flex:1,padding:'8px 11px',background:t.bg,border:`1px solid ${t.border}`,borderRadius:7,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',minWidth:0}
   const toggle=(platform)=>setData({...data,links:data.links.map(l=>l.platform===platform?{...l,active:!l.active}:l)})
-const updateUrl=(platform,url)=>setData({...data,links:data.links.map(l=>l.platform===platform?{...l,url}:l)})
+  const updateUrl=(platform,url)=>setData({...data,links:data.links.map(l=>l.platform===platform?{...l,url}:l)})
 
   return(
-    <div style={{padding:'20px 0'}}>
-      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:6,fontFamily:'sans-serif'}}>🔗 Links & SNS</p>
-      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:18,lineHeight:1.7}}>☰ 드래그로 순서 변경<br/>토글로 표시 여부 설정</p>
+    <div style={{padding:'4px 0'}}>
+      <p style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:6,fontFamily:'sans-serif'}}>🔗 링크 & SNS</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:18,lineHeight:1.6}}>⋮⋮ 를 잡고 드래그하면 순서가 바뀌고, 토글을 끄면 카드에서 숨겨져요.</p>
       <div style={{display:'flex',flexDirection:'column',gap:8}}>
         {sorted.map((link,i)=>{
           const m=SNS_META[link.platform]||{label:link.platform,color:t.accent,gradient:`linear-gradient(135deg,${t.accent},${t.accent})`,icon:'·'}
           const isOver=overIdx===i&&dragIdx!==i
           const iProps=getItemProps(i)
           return(
-            <div key={link.platform} {...iProps} style={{...iProps.style,padding:'11px 13px',
+            <div key={link.platform} {...iProps} style={{...iProps.style,padding:'11px 13px',borderRadius:8,
               background:link.active?`rgba(${hexToRgb(m.color)},.06)`:t.surfaceAlt,
               border:`1px solid ${isOver?t.accent:link.active?m.color:t.border}`,
               borderLeft:isOver?`3px solid ${t.accent}`:`1px solid ${link.active?m.color:t.border}`}}>
@@ -206,41 +206,41 @@ function PortfolioPanel({t,data,setData}){
     readFileB64(file).then(function(b64){ update(id,{image:b64}) })
   }
 
-  const inp={width:'100%',padding:'8px 10px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:11,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
+  const inp={width:'100%',padding:'9px 11px',background:t.surfaceAlt,border:`1px solid ${t.border}`,borderRadius:7,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
 
   return(
-    <div style={{padding:'20px 0'}}>
+    <div style={{padding:'4px 0'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
-        <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',fontFamily:'sans-serif',margin:0}}>🖼 Portfolio Items</p>
-        <button onClick={addItem} style={{fontSize:9,letterSpacing:'2px',padding:'5px 12px',background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+        <p style={{fontSize:13,fontWeight:700,color:t.text,fontFamily:'sans-serif',margin:0}}>🖼 포트폴리오</p>
+        <button onClick={addItem} style={{fontSize:11,padding:'6px 13px',borderRadius:7,background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',fontWeight:700}}>+ 추가</button>
       </div>
-      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:18,lineHeight:1.7}}>각 항목에 썸네일을 업로드하거나<br/>텍스트만 입력하세요.</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:18,lineHeight:1.6}}>각 항목에 썸네일을 올리거나 텍스트만 입력해도 돼요.</p>
       <div style={{display:'flex',flexDirection:'column',gap:14}}>
         {data.portfolio.map((p)=>(
-          <div key={p.id} style={{padding:'14px',border:`1px solid ${t.border}`,background:t.surfaceAlt,position:'relative'}}>
+          <div key={p.id} style={{padding:'14px',borderRadius:10,border:`1px solid ${t.border}`,background:t.surfaceAlt,position:'relative'}}>
             <button onClick={()=>remove(p.id)} style={{position:'absolute',top:10,right:10,width:22,height:22,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:13,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>×</button>
             <label style={{display:'block',cursor:'pointer',marginBottom:10}}>
               {p.image?(
                 <div style={{position:'relative'}}>
-                  <img src={p.image} alt={p.title} style={{width:'100%',height:90,objectFit:'cover',display:'block'}}/>
-                  <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,.4)',display:'flex',alignItems:'center',justifyContent:'center',opacity:0,transition:'opacity .2s'}}
+                  <img src={p.image} alt={p.title} style={{width:'100%',height:90,objectFit:'cover',display:'block',borderRadius:6}}/>
+                  <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,.4)',display:'flex',alignItems:'center',justifyContent:'center',opacity:0,transition:'opacity .2s',borderRadius:6}}
                     onMouseEnter={e=>e.currentTarget.style.opacity=1} onMouseLeave={e=>e.currentTarget.style.opacity=0}>
                     <span style={{color:'#fff',fontSize:11,fontFamily:'sans-serif',letterSpacing:'2px'}}>변경</span>
                   </div>
                 </div>
               ):(
-                <div style={{height:64,background:t.bg,border:`1px dashed ${t.border}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                  <span style={{fontSize:10,color:t.textSub,letterSpacing:'2px',fontFamily:'sans-serif'}}>+ 이미지 업로드</span>
+                <div style={{height:70,borderRadius:6,background:t.bg,border:`1px dashed ${t.border}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <span style={{fontSize:12,color:t.textSub,fontFamily:'sans-serif'}}>+ 이미지 업로드</span>
                 </div>
               )}
               <input type='file' accept='image/*' style={{display:'none'}} onChange={e=>handleImgChange(e,p.id)}/>
             </label>
-            <input style={inp} placeholder='Project Title' value={p.title} onChange={e=>update(p.id,{title:e.target.value})}/>
+            <input style={inp} placeholder='프로젝트명' value={p.title} onChange={e=>update(p.id,{title:e.target.value})}/>
             <div style={{display:'flex',gap:8}}>
-              <input style={{...inp,flex:1,marginBottom:0}} placeholder='Year' value={p.year} onChange={e=>update(p.id,{year:e.target.value})}/>
-              <input style={{...inp,flex:1,marginBottom:0}} placeholder='Tag' value={p.tag} onChange={e=>update(p.id,{tag:e.target.value})}/>
+              <input style={{...inp,flex:1,marginBottom:0}} placeholder='연도' value={p.year} onChange={e=>update(p.id,{year:e.target.value})}/>
+              <input style={{...inp,flex:1,marginBottom:0}} placeholder='태그' value={p.tag} onChange={e=>update(p.id,{tag:e.target.value})}/>
             </div>
-            {p.image&&<button onClick={()=>update(p.id,{image:null})} style={{marginTop:8,fontSize:9,color:t.textSub,background:'none',border:'none',cursor:'pointer',letterSpacing:'1px',fontFamily:'sans-serif'}}>× 이미지 제거</button>}
+            {p.image&&<button onClick={()=>update(p.id,{image:null})} style={{marginTop:8,fontSize:11,color:t.textSub,background:'none',border:'none',cursor:'pointer',fontFamily:'sans-serif'}}>× 이미지 제거</button>}
           </div>
         ))}
       </div>
@@ -254,19 +254,19 @@ function ServicesEditor({t,data,setData,inp,lbl}){
   const remove=(id)=>setData({...data,services:data.services.filter(s=>s.id!==id)})
   const update=(id,fields)=>setData({...data,services:data.services.map(s=>s.id===id?{...s,...fields}:s)})
   return(<>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:18,marginBottom:6}}>
-      <p style={{...lbl,margin:0}}>✦ Services</p>
-      <button onClick={add} style={{fontSize:9,letterSpacing:'2px',padding:'4px 10px',background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:22,marginBottom:6}}>
+      <p style={{...lbl,margin:0,fontSize:12,letterSpacing:'1px',color:t.accent,fontWeight:700}}>✦ 서비스</p>
+      <button onClick={add} style={{fontSize:11,padding:'5px 12px',borderRadius:7,background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',fontWeight:700}}>+ 추가</button>
     </div>
     {data.services.map((s)=>(
-      <div key={s.id} style={{padding:'12px',border:`1px solid ${t.border}`,marginBottom:10,background:t.surfaceAlt,position:'relative'}}>
+      <div key={s.id} style={{padding:'12px',borderRadius:10,border:`1px solid ${t.border}`,marginBottom:10,background:t.surfaceAlt,position:'relative'}}>
         <button onClick={()=>remove(s.id)} style={{position:'absolute',top:8,right:8,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
-        <input style={inp} placeholder='Title' value={s.title} onChange={e=>update(s.id,{title:e.target.value})}/>
-        <input style={{...inp,marginBottom:0}} placeholder='Description' value={s.desc} onChange={e=>update(s.id,{desc:e.target.value})}/>
+        <input style={inp} placeholder='서비스명' value={s.title} onChange={e=>update(s.id,{title:e.target.value})}/>
+        <input style={{...inp,marginBottom:0}} placeholder='한 줄 설명' value={s.desc} onChange={e=>update(s.id,{desc:e.target.value})}/>
 
         {/* ── 상세 리스트 (바텀시트에 뜨는 항목들) ── */}
         <div style={{marginTop:12,paddingTop:12,borderTop:`1px dashed ${t.border}`}}>
-          <p style={{fontSize:9,letterSpacing:'1px',color:t.textSub,fontFamily:'sans-serif',marginBottom:8,textTransform:'uppercase'}}>상세 리스트</p>
+          <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:8}}>상세 리스트 (모바일에서 탭하면 뜨는 항목)</p>
           {(s.items||[]).map((it,ii)=>(
             <div key={ii} style={{display:'flex',gap:6,marginBottom:6,alignItems:'center'}}>
               <input style={{...inp,marginBottom:0,flex:1}} placeholder={`항목 ${ii+1}`} value={it}
@@ -281,7 +281,7 @@ function ServicesEditor({t,data,setData,inp,lbl}){
             </div>
           ))}
           <button onClick={()=>update(s.id,{items:[...(s.items||[]),'']})}
-            style={{fontSize:9,letterSpacing:'1px',padding:'5px 12px',background:'transparent',border:`1px solid ${t.border}`,color:t.text,cursor:'pointer',fontFamily:'sans-serif',marginTop:2}}>+ 항목 추가</button>
+            style={{fontSize:11,padding:'6px 12px',borderRadius:7,background:'transparent',border:`1px solid ${t.border}`,color:t.text,cursor:'pointer',fontFamily:'sans-serif',marginTop:2}}>+ 항목 추가</button>
         </div>
       </div>
     ))}
@@ -293,21 +293,21 @@ function HistoryPanel({t,data,setData}){
   const add=()=>setData({...data,history:[{id:'h'+uid(),year:String(new Date().getFullYear()),desc:'새로운 연혁을 입력하세요'},...data.history]})
   const remove=(id)=>setData({...data,history:data.history.filter(h=>h.id!==id)})
   const update=(id,fields)=>setData({...data,history:data.history.map(h=>h.id===id?{...h,...fields}:h)})
-  const inp={width:'100%',padding:'9px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
+  const inp={width:'100%',padding:'10px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,borderRadius:7,color:t.text,fontSize:13,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
   return(
     <div style={{padding:'4px 0'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
-        <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',fontFamily:'sans-serif',margin:0}}>🕰 History</p>
-        <button onClick={add} style={{fontSize:9,letterSpacing:'2px',padding:'4px 10px',background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+        <p style={{fontSize:13,fontWeight:700,color:t.text,fontFamily:'sans-serif',margin:0}}>🕰 연혁</p>
+        <button onClick={add} style={{fontSize:11,padding:'6px 13px',borderRadius:7,background:t.accent,border:'none',color:t.id==='white'?'#fff':'#0a0a0f',cursor:'pointer',fontFamily:'sans-serif',fontWeight:700}}>+ 추가</button>
       </div>
-      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>연도(4자리)와 한 줄 설명을 입력하세요.<br/>최신순으로 정렬해서 보여줍니다.</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>연도(4자리)와 한 줄 설명을 입력하세요. 최신순으로 정렬해서 보여줍니다.</p>
       {data.history.length===0&&(
-        <div style={{padding:'20px 14px',border:`1px dashed ${t.border}`,textAlign:'center',fontSize:11,color:t.textSub,fontFamily:'sans-serif'}}>
+        <div style={{padding:'20px 14px',borderRadius:8,border:`1px dashed ${t.border}`,textAlign:'center',fontSize:12,color:t.textSub,fontFamily:'sans-serif'}}>
           항목이 없습니다. + 추가를 눌러 연혁을 입력하세요.
         </div>
       )}
       {data.history.map((h)=>(
-        <div key={h.id} style={{padding:'12px',border:`1px solid ${t.border}`,marginBottom:10,background:t.surfaceAlt,position:'relative'}}>
+        <div key={h.id} style={{padding:'12px',borderRadius:10,border:`1px solid ${t.border}`,marginBottom:10,background:t.surfaceAlt,position:'relative'}}>
           <button onClick={()=>remove(h.id)} style={{position:'absolute',top:8,right:8,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
           <input style={{...inp,width:90,display:'inline-block',marginRight:8}} placeholder='연도' maxLength={4} value={h.year} onChange={e=>update(h.id,{year:e.target.value})}/>
           <input style={{...inp,marginBottom:0}} placeholder='설명' value={h.desc} onChange={e=>update(h.id,{desc:e.target.value})}/>
@@ -326,18 +326,18 @@ function PricingPanel({t,data,setData}){
   const addFeature=(id)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:[...p.features,'새 기능']}:p)})
   const updateFeature=(id,fi,val)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:p.features.map((f,i)=>i===fi?val:f)}:p)})
   const removeFeature=(id,fi)=>setData({...data,pricing:data.pricing.map(p=>p.id===id?{...p,features:p.features.filter((_,i)=>i!==fi)}:p)})
-  const inp={width:'100%',padding:'9px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
-  const inpSm={...inp,marginBottom:0,fontSize:11,padding:'7px 10px'}
+  const inp={width:'100%',padding:'10px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,borderRadius:7,color:t.text,fontSize:13,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:8}
+  const inpSm={...inp,marginBottom:0,fontSize:12,padding:'8px 10px'}
   return(
     <div style={{padding:'4px 0'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
-        <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',fontFamily:'sans-serif',margin:0}}>💳 Pricing</p>
+        <p style={{fontSize:13,fontWeight:700,color:t.text,fontFamily:'sans-serif',margin:0}}>💳 단가표</p>
         <button onClick={add} disabled={data.pricing.length>=4}
-          style={{fontSize:9,letterSpacing:'2px',padding:'4px 10px',background:data.pricing.length>=4?t.border:t.accent,border:'none',color:data.pricing.length>=4?t.textSub:(t.id==='white'?'#fff':'#0a0a0f'),cursor:data.pricing.length>=4?'not-allowed':'pointer',fontFamily:'sans-serif',textTransform:'uppercase',fontWeight:700}}>+ 추가</button>
+          style={{fontSize:11,padding:'6px 13px',borderRadius:7,background:data.pricing.length>=4?t.border:t.accent,border:'none',color:data.pricing.length>=4?t.textSub:(t.id==='white'?'#fff':'#0a0a0f'),cursor:data.pricing.length>=4?'not-allowed':'pointer',fontFamily:'sans-serif',fontWeight:700}}>+ 추가</button>
       </div>
-      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>플랜은 최대 4개까지 추가할 수 있어요.<br/>'추천' 토글을 켜면 카드가 강조됩니다.</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:14,lineHeight:1.6}}>플랜은 최대 4개까지 추가할 수 있어요. '추천' 토글을 켜면 그 카드가 강조됩니다.</p>
       {data.pricing.map((p)=>(
-        <div key={p.id} style={{padding:'14px',border:`1px solid ${p.highlighted?t.accent:t.border}`,marginBottom:12,background:t.surfaceAlt,position:'relative'}}>
+        <div key={p.id} style={{padding:'14px',borderRadius:10,border:`1px solid ${p.highlighted?t.accent:t.border}`,marginBottom:12,background:t.surfaceAlt,position:'relative'}}>
           <button onClick={()=>remove(p.id)} style={{position:'absolute',top:10,right:10,width:20,height:20,borderRadius:'50%',background:'rgba(255,80,80,.15)',border:'1px solid rgba(255,80,80,.3)',color:'#ff5050',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
 
           <input style={inp} placeholder='플랜 이름' value={p.name} onChange={e=>update(p.id,{name:e.target.value})}/>
@@ -348,19 +348,19 @@ function PricingPanel({t,data,setData}){
 
           {/* 기능 목록 */}
           <div style={{marginBottom:8}}>
-            <span style={{fontSize:9,letterSpacing:'1px',color:t.textSub,textTransform:'uppercase',fontFamily:'sans-serif'}}>기능 목록</span>
+            <span style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif'}}>기능 목록</span>
             {p.features.map((f,fi)=>(
               <div key={fi} style={{display:'flex',gap:6,marginTop:6}}>
                 <input style={{...inpSm,flex:1}} value={f} onChange={e=>updateFeature(p.id,fi,e.target.value)}/>
-                <button onClick={()=>removeFeature(p.id,fi)} style={{width:28,flexShrink:0,background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontSize:12}}>×</button>
+                <button onClick={()=>removeFeature(p.id,fi)} style={{width:28,flexShrink:0,borderRadius:6,background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontSize:12}}>×</button>
               </div>
             ))}
-            <button onClick={()=>addFeature(p.id)} style={{marginTop:6,fontSize:9,letterSpacing:'1px',padding:'5px 10px',background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontFamily:'sans-serif',textTransform:'uppercase'}}>+ 기능 추가</button>
+            <button onClick={()=>addFeature(p.id)} style={{marginTop:6,fontSize:11,padding:'6px 11px',borderRadius:7,background:'transparent',border:`1px solid ${t.border}`,color:t.textSub,cursor:'pointer',fontFamily:'sans-serif'}}>+ 기능 추가</button>
           </div>
 
           {/* 추천 토글 */}
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${t.border}`}}>
-            <span style={{fontSize:10,color:t.text,fontFamily:'sans-serif'}}>이 플랜을 추천으로 강조</span>
+            <span style={{fontSize:12,color:t.text,fontFamily:'sans-serif'}}>이 플랜을 추천으로 강조</span>
             <div onClick={()=>setHighlight(p.id)}
               style={{width:38,height:22,borderRadius:11,cursor:'pointer',flexShrink:0,background:p.highlighted?t.accent:t.border,position:'relative',transition:'background .2s'}}>
               <div style={{position:'absolute',top:2,width:18,height:18,borderRadius:'50%',background:'#fff',left:p.highlighted?18:2,transition:'left .2s'}}/>
@@ -383,13 +383,13 @@ function SectionsPanel({t,data,setData}){
   ]
   return(
     <div style={{padding:'4px 0'}}>
-      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:8,fontFamily:'sans-serif'}}>📑 표시할 섹션</p>
-      <p style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif',marginBottom:16,lineHeight:1.6}}>켜둔 섹션만 카드 공개 화면에 노출됩니다.<br/>내용은 꺼져 있어도 저장되어 있어요.</p>
+      <p style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:6,fontFamily:'sans-serif'}}>📑 표시할 섹션</p>
+      <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',marginBottom:16,lineHeight:1.6}}>켜둔 섹션만 카드 공개 화면에 노출됩니다. 내용은 꺼져 있어도 저장되어 있어요.</p>
       {SI.map(item=>(
         <div key={item.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 0',borderBottom:`1px solid ${t.border}`}}>
-          <div>
-            <div style={{fontSize:12,color:t.text,fontFamily:'sans-serif',marginBottom:3}}>{item.label}</div>
-            <div style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif'}}>{item.desc}</div>
+          <div style={{paddingRight:12}}>
+            <div style={{fontSize:13,color:t.text,fontFamily:'sans-serif',marginBottom:3}}>{item.label}</div>
+            <div style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',lineHeight:1.5}}>{item.desc}</div>
           </div>
           <div onClick={()=>toggle(item.key)}
             style={{width:42,height:24,borderRadius:12,cursor:'pointer',flexShrink:0,background:sections[item.key]?t.accent:t.border,position:'relative',transition:'background .2s'}}>
@@ -414,12 +414,12 @@ function MotionPanel({t,me,setMe}){
   ]
   return(
     <div style={{padding:'4px 0'}}>
-      <p style={{fontSize:9,letterSpacing:'4px',color:t.accent,textTransform:'uppercase',marginBottom:18,fontFamily:'sans-serif'}}>✦ Motion Settings</p>
+      <p style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:16,fontFamily:'sans-serif'}}>✦ 모션 설정</p>
       {MI.map(item=>(
         <div key={item.key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 0',borderBottom:`1px solid ${t.border}`}}>
           <div>
-            <div style={{fontSize:12,color:t.text,fontFamily:'sans-serif',marginBottom:3}}>{item.label}</div>
-            <div style={{fontSize:10,color:t.textSub,fontFamily:'sans-serif'}}>{item.desc}</div>
+            <div style={{fontSize:13,color:t.text,fontFamily:'sans-serif',marginBottom:3}}>{item.label}</div>
+            <div style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif'}}>{item.desc}</div>
           </div>
           <div onClick={()=>setMe(p=>({...p,[item.key]:!p[item.key]}))}
             style={{width:42,height:24,borderRadius:12,cursor:'pointer',flexShrink:0,background:me[item.key]?t.accent:t.border,position:'relative',transition:'background .2s'}}>
@@ -435,61 +435,99 @@ function MotionPanel({t,me,setMe}){
 export default function EditorPanel({t,data,setData,co,setCo,me,setMe}){
   const[et,sEt]=useState('content')
 
-  const inp={width:'100%',padding:'9px 12px',background:t.surfaceAlt,border:`1px solid ${t.border}`,color:t.text,fontSize:12,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:10}
-  const lbl={fontSize:9,letterSpacing:'3px',color:t.accent,textTransform:'uppercase',display:'block',marginBottom:5,fontFamily:'sans-serif'}
+  // 입력칸 · 라벨 · 보조설명 · 그룹헤더 공통 스타일
+  const inp={width:'100%',padding:'11px 13px',background:t.surfaceAlt,border:`1px solid ${t.border}`,borderRadius:8,color:t.text,fontSize:13,fontFamily:'sans-serif',outline:'none',boxSizing:'border-box',marginBottom:12}
+  const lbl={fontSize:13,fontWeight:600,color:t.text,display:'block',marginBottom:4,fontFamily:'sans-serif'}
+  const hintS={fontSize:11,color:t.textSub,fontFamily:'sans-serif',margin:'0 0 7px',lineHeight:1.5}
+  const grpHdr={fontSize:12,letterSpacing:'.5px',color:t.accent,fontWeight:700,fontFamily:'sans-serif',margin:'22px 0 12px'}
 
-  const TABS=[
-    {k:'content',  l:'✏ 내용'},
-    {k:'sections', l:'📑 섹션'},
-    {k:'history',  l:'🕰 연혁'},
-    {k:'pricing',  l:'💳 단가표'},
-    {k:'portfolio',l:'🖼 포트폴리오'},
-    {k:'links',    l:'🔗 링크'},
-    {k:'color',    l:'🎨 색상'},
-    {k:'image',    l:'📷 이미지'},
-    {k:'motion',   l:'✦ 모션'},
+  // 9개 탭을 의미 단위 3그룹으로 묶음 (키는 그대로라 동작 변화 없음)
+  const NAV=[
+    {group:'작성', items:[
+      {k:'content',  l:'내용',     i:'✏️'},
+      {k:'portfolio',l:'포트폴리오', i:'🖼'},
+      {k:'history',  l:'연혁',     i:'🕰'},
+      {k:'pricing',  l:'단가표',   i:'💳'},
+      {k:'links',    l:'링크',     i:'🔗'},
+    ]},
+    {group:'디자인', items:[
+      {k:'color', l:'색상', i:'🎨'},
+      {k:'image', l:'이미지', i:'📷'},
+      {k:'motion',l:'모션', i:'✦'},
+    ]},
+    {group:'설정', items:[
+      {k:'sections', l:'표시 설정', i:'📑'},
+    ]},
   ]
+
+  const pill=(on)=>({
+    display:'inline-flex',alignItems:'center',gap:5,padding:'7px 12px',borderRadius:20,
+    background:on?t.accent:'transparent',
+    border:`1px solid ${on?t.accent:t.border}`,
+    color:on?(t.id==='white'?'#fff':'#0a0a0f'):t.textSub,
+    fontSize:12,fontWeight:on?700:500,cursor:'pointer',fontFamily:'sans-serif',
+    whiteSpace:'nowrap',transition:'all .15s',
+  })
 
   return(
     <div style={{display:'flex',flexDirection:'column',height:'100%',background:t.surface}}>
-      {/* 탭 헤더 */}
-      <div style={{display:'flex',borderBottom:`1px solid ${t.border}`,flexShrink:0,overflowX:'auto'}}>
-        {TABS.map(tab=>(
-          <button key={tab.k} onClick={()=>sEt(tab.k)}
-            style={{flexShrink:0,padding:'10px 9px',background:et===tab.k?t.surfaceAlt:'transparent',border:'none',
-              borderBottom:et===tab.k?`2px solid ${t.accent}`:'2px solid transparent',
-              color:et===tab.k?t.accent:t.textSub,fontSize:9,letterSpacing:'1px',
-              textTransform:'uppercase',cursor:'pointer',fontFamily:'sans-serif',whiteSpace:'nowrap'}}>
-            {tab.l}
-          </button>
+      {/* 그룹형 내비게이션 */}
+      <div style={{flexShrink:0,borderBottom:`1px solid ${t.border}`,padding:'12px 16px 8px'}}>
+        <p style={{fontSize:11,color:t.textSub,fontFamily:'sans-serif',margin:'0 0 12px'}}>왼쪽에 입력하면 오른쪽 미리보기에 바로 반영돼요.</p>
+        {NAV.map(grp=>(
+          <div key={grp.group} style={{marginBottom:10}}>
+            <div style={{fontSize:10,letterSpacing:'1.5px',color:t.textSub,fontFamily:'sans-serif',marginBottom:6,opacity:.8}}>{grp.group}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+              {grp.items.map(tab=>(
+                <button key={tab.k} onClick={()=>sEt(tab.k)} style={pill(et===tab.k)}>
+                  <span>{tab.i}</span>{tab.l}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
       {/* 탭 내용 */}
-      <div style={{flex:1,overflowY:'auto',padding:'20px'}}>
+      <div style={{flex:1,overflowY:'auto',padding:'18px 20px 28px'}}>
 
         {et==='content'&&(<>
-          <label style={lbl}>Company Name</label>
+          <p style={{...grpHdr,marginTop:4}}>🏢 회사 기본 정보</p>
+
+          <label style={lbl}>회사명</label>
+          <p style={hintS}>명함 맨 위에 가장 크게 표시돼요</p>
           <input style={inp} value={data.companyName} onChange={e=>setData({...data,companyName:e.target.value})}/>
-          <label style={lbl}>Tagline</label>
+
+          <label style={lbl}>한 줄 소개 (태그라인)</label>
+          <p style={hintS}>회사명 아래 들어가는 짧은 카피</p>
           <input style={inp} value={data.tagline} onChange={e=>setData({...data,tagline:e.target.value})}/>
-          <label style={lbl}>Logo Letter</label>
-          <input style={inp} value={data.logo} maxLength={2} onChange={e=>setData({...data,logo:e.target.value})}/>
-          <label style={lbl}>Description</label>
-          <textarea style={{...inp,minHeight:80,resize:'vertical'}} value={data.description} onChange={e=>setData({...data,description:e.target.value})}/>
-          <p style={{...lbl,marginTop:18}}>✦ Contact</p>
-          {['email','phone','address'].map(k=>(
-            <div key={k}>
-              <label style={lbl}>{k}</label>
-              <input style={inp} value={data.contact[k]} onChange={e=>setData({...data,contact:{...data.contact,[k]:e.target.value}})}/>
-            </div>
-          ))}
-          <p style={{...lbl,marginTop:18}}>✦ Stats</p>
+
+          <label style={lbl}>로고 글자</label>
+          <p style={hintS}>로고 자리에 들어갈 1~2글자 (예: AS)</p>
+          <input style={{...inp,maxWidth:140}} value={data.logo} maxLength={2} onChange={e=>setData({...data,logo:e.target.value})}/>
+
+          <label style={lbl}>회사 소개</label>
+          <p style={hintS}>엔터로 줄바꿈할 수 있어요</p>
+          <textarea style={{...inp,minHeight:90,resize:'vertical'}} value={data.description} onChange={e=>setData({...data,description:e.target.value})}/>
+
+          <p style={grpHdr}>✉️ 연락처</p>
+
+          <label style={lbl}>이메일</label>
+          <input style={inp} value={data.contact.email} onChange={e=>setData({...data,contact:{...data.contact,email:e.target.value}})}/>
+
+          <label style={lbl}>전화번호</label>
+          <input style={inp} value={data.contact.phone} onChange={e=>setData({...data,contact:{...data.contact,phone:e.target.value}})}/>
+
+          <label style={lbl}>주소</label>
+          <input style={inp} value={data.contact.address} onChange={e=>setData({...data,contact:{...data.contact,address:e.target.value}})}/>
+
+          <p style={grpHdr}>📊 실적 지표</p>
+          <p style={hintS}>히어로에서 숫자가 올라가는 카운터예요. 항목명 · 숫자 · 단위 순서로 입력하세요.</p>
           {data.stats.map((s,i)=>(
             <div key={i} style={{display:'flex',gap:8,marginBottom:8}}>
-              <input style={{...inp,flex:2,marginBottom:0}} placeholder='Label' value={s.label} onChange={e=>{const a=[...data.stats];a[i]={...a[i],label:e.target.value};setData({...data,stats:a})}}/>
+              <input style={{...inp,flex:2,marginBottom:0}} placeholder='항목명 (예: Projects)' value={s.label} onChange={e=>{const a=[...data.stats];a[i]={...a[i],label:e.target.value};setData({...data,stats:a})}}/>
               <input style={{...inp,flex:1,marginBottom:0}} type='number' value={s.value} onChange={e=>{const a=[...data.stats];a[i]={...a[i],value:Number(e.target.value)};setData({...data,stats:a})}}/>
-              <input style={{...inp,flex:1,marginBottom:0}} placeholder='+' value={s.suffix} onChange={e=>{const a=[...data.stats];a[i]={...a[i],suffix:e.target.value};setData({...data,stats:a})}}/>
+              <input style={{...inp,flex:1,marginBottom:0}} placeholder='단위 (예: +)' value={s.suffix} onChange={e=>{const a=[...data.stats];a[i]={...a[i],suffix:e.target.value};setData({...data,stats:a})}}/>
             </div>
           ))}
           <ServicesEditor t={t} data={data} setData={setData} inp={inp} lbl={lbl}/>
